@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@font-face {
+  font-family: 'Arimo';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src:
+    local('Arimo Regular '),
+    local('Arimo-Regular'),
+    url('./files/arimo-latin-400.woff2') format('woff2'),
+    url('./files/arimo-latin-400.woff') format('woff');
+}
+body{font-family:'Arimo',sans-serif;user-select:none}
+.name{font-size:20px;border:0;width:100%;font-weight:bold;text-align:center;outline:none}
+.player{display:flex;flex-direction:column;width:250px;justify-content:center;flex-grow: 1;flex: 1 1 30%;margin:0 0 40px}
+.pts{display:flex;justify-content:center}
+.logo{display:flex}
+.chance{display:flex;justify-content:center}
+.arrow{margin:0 10px}
+.box{width:50px;height:50px;margin:10px;background-color:green}
+.red{background:red}
+.green{background:green}
+.players{margin:50px 0 80px;display:flex;flex-wrap:wrap}
+.qty{border:0;text-align:center;font-size:32px;width:200px;outline:none}
+.wrs2,.wrs{margin:0 10px}
+.sspg{pointer-events:none;margin:0 10px 0 0}
+.settings{bottom:0}
+.hidden{display:none}
+input[type="text"]:disabled{background:none !important}
+.switch{position:relative;display:inline-block;width:60px;height:34px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#ccc;-webkit-transition:.4s;transition:.4s}
+.reset:before,
+.slider:before{position:absolute;content:"";height:26px;width:26px;left:4px;bottom:4px;background-color:#fff;-webkit-transition:.4s;transition:.4s}
+.reset:checked,
+input:checked+.slider{background-color:#2196F3}
+.reset:focus,
+input:focus+.slider{box-shadow:0 0 1px #2196F3}
+input:checked+.slider:before{-webkit-transform:translateX(26px);-ms-transform:translateX(26px);transform:translateX(26px)}
+.reset{background-color:#ccc;height:34px;border:0}
+.settings{height:40px;display:flex;align-items:center;justify-content:space-between;width:99%;bottom:5px;position:absolute}
+.players{margin:50px 0 80px}
+.settings>*{display:none}
+.settings:hover>*{display:block}
+.copyright{font-weight:bold;font-size:11px}
+</style>
+<script>window.$ = window.jQuery = require('jquery');</script>
+<script>
+$(document).ready(function(){
+        for(let i=1;i<=9;i++){
+            var v1 = localStorage.getItem('pla'+i);
+            var v2 = localStorage.getItem('namepla'+i);
+            if (v1)
+                $('input[name=pla'+i+'].qty').val(v1);
+            if (v2)
+                $('input[name=pla'+i+'].name').val(v2);
+            var b1 = localStorage.getItem('chance'+i+' box1');
+            var b2 = localStorage.getItem('chance'+i+' box2');
+            var b3 = localStorage.getItem('chance'+i+' box3');
+            if (b1){
+                $('div[data-val="chance'+i+' box1"]').removeClass().attr('class', b1);
+			}
+            if (b2){
+                $('div[data-val="chance'+i+' box2"]').removeClass().attr('class', b2);
+			}
+            if (b3){
+                $('div[data-val="chance'+i+' box3"]').removeClass().attr('class', b3);
+			}
+        }
+		var clicked=false;
+        $(".box").click(function(e){
+			e.preventDefault();
+            if(clicked){
+                $(this).toggleClass('green red');
+                clicked = false;
+				localStorage.setItem($(this).attr("data-val"), $(this).attr("class"));
+            } else {
+                $(this).toggleClass('red green');
+                clicked = true;
+				localStorage.setItem($(this).attr("data-val"), $(this).attr("class"));
+            }   
+        });
+		$('.right').click(function(e){
+			e.preventDefault();
+			fn = $(this).attr('field');
+			var cv = parseInt($('input[name='+fn+'].qty').val());
+			if (!isNaN(cv))
+				$('input[name='+fn+'].qty').val(cv + 10);
+			else
+				$('input[name='+fn+'].qty').val(0);
+                
+            localStorage.setItem(fn, $('input[name='+fn+'].qty').val());
+		});
+		$(".left").click(function(e) {
+			e.preventDefault();
+			fn = $(this).attr('field');
+			var cv = parseInt($('input[name='+fn+'].qty').val());
+			if (!isNaN(cv) && cv > 0 && cv-10 > 0)
+				$('input[name='+fn+'].qty').val(cv - 10);
+			else
+				$('input[name='+fn+'].qty').val(0);
+
+            localStorage.setItem(fn, $('input[name='+fn+'].qty').val());
+		});
+		$(".reset").click(function(e) {
+			e.preventDefault();
+			$('.qty').val(0);
+			$('.name').val("Brak");
+			$('.box').removeClass().attr('class', 'box green');
+            $('.wrs').attr('style', '');
+			$('.wrs2').attr('style', '');
+		});
+    	$(".qty").keyup(function(e) {
+    		fn = $(this).attr('name');
+            localStorage.setItem(fn, $('input[name='+fn+'].qty').val());
+    	});
+    	$(".name").keyup(function(e) {
+    		fn = $(this).attr('name');
+            localStorage.setItem('name'+fn, $('input[name='+fn+'].name').val());
+    	});
+		$('input[type=checkbox].settings-disable').click(function(e){
+			if($('input[type=checkbox].settings-disable').prop('checked')){
+				$(".wrs").toggleClass('wrs wrs2');
+				$(".wrs2").click(function(e){
+					e.preventDefault();
+					$(this).css('display', 'none');
+				});
+				$(".name").prop("disabled", false);
+			}
+			else{
+				$(".wrs2").toggleClass('wrs2 wrs');
+				$(".wrs").click(function(e){
+					e.preventDefault();
+					$(this).css('display', 'block');
+				});
+				$(".name").prop("disabled", true);
+			}
+        });
+    });
+</script>
+</head>
+<body>
+<div class="logo">
+<div class="sspg"><img src="images/sspg.png" width="100"/></div>
+<div class="wrs ftims"><img src="images/wrsftims.jpg" width="80"/></div>
+<div class="wrs arch"><img src="images/wrsarch.jpg" width="80"/></div>
+<div class="wrs chem"><img src="images/wrschem.jpg" width="80"/></div>
+<div class="wrs eia"><img src="images/wrseia.png" width="80"/></div>
+<div class="wrs eti"><img src="images/wrseti.jpg" width="80"/></div>
+<div class="wrs mech"><img src="images/wrsmech.jpg" width="80"/></div>
+<div class="wrs oio"><img src="images/wrsoio.png" width="80"/></div>
+<div class="wrs wilis"><img src="images/wrswilis.jpg" width="80"/></div>
+<div class="wrs zie"><img src="images/wrszie.jpg" width="80"/></div>
+</div>
+
+<div class="players">
+
+<div class="player">
+<div class="playername"><input class="name" name="pla1" type="text" value="Brak" disabled /></div>
+<form id="pts1" class="pts" method="POST" action="#">
+    <input type="button" value="<" class="left" field="pla1" />
+    <input type="text" name="pla1" value="0" class="qty" />
+    <input type="button" value=">" class="right" field="pla1" />
+</form>
+<div class="chance">
+	<div data-val="chance1 box1" class="box green"></div>
+	<div data-val="chance1 box2" class="box green"></div>
+	<div data-val="chance1 box3" class="box green"></div>
+</div>
+</div>
+<div class="player">
+<div class="playername"><input class="name" name="pla2" type="text" value="Brak" disabled /></div>
+<form id="pts2" class="pts" method="POST" action="#">
+    <input type="button" value="<" class="left" field="pla2" />
+    <input type="text" name="pla2" value="0" class="qty" />
+    <input type="button" value=">" class="right" field="pla2" />
+</form>
+<div class="chance">
+	<div data-val="chance2 box1" class="box green"></div>
+	<div data-val="chance2 box2" class="box green"></div>
+	<div data-val="chance2 box3" class="box green"></div>
+</div>
+</div>
+<div class="player">
+<div class="playername"><input class="name" name="pla3" type="text" value="Brak" disabled /></div>
+<form id="pts3" class="pts" method="POST" action="#">
+    <input type="button" value="<" class="left" field="pla3" />
+    <input type="text" name="pla3" value="0" class="qty" />
+    <input type="button" value=">" class="right" field="pla3" />
+</form>
+<div class="chance">
+	<div data-val="chance3 box1" class="box green"></div>
+	<div data-val="chance3 box2" class="box green"></div>
+	<div data-val="chance3 box3" class="box green"></div>
+</div>
+</div>
+<div class="player">
+<div class="playername"><input class="name" name="pla4" type="text" value="Brak" disabled /></div>
+<form id="pts4" class="pts" method="POST" action="#">
+    <input type="button" value="<" class="left" field="pla4" />
+    <input type="text" name="pla4" value="0" class="qty" />
+    <input type="button" value=">" class="right" field="pla4" />
+</form>
+<div class="chance">
+	<div data-val="chance4 box1" class="box green"></div>
+	<div data-val="chance4 box2" class="box green"></div>
+	<div data-val="chance4 box3" class="box green"></div>
+</div>
+</div>
+<div class="player">
+<div class="playername"><input class="name" name="pla5" type="text" value="Brak" disabled /></div>
+<form id="pts5" class="pts" method="POST" action="#">
+    <input type="button" value="<" class="left" field="pla5" />
+    <input type="text" name="pla5" value="0" class="qty" />
+    <input type="button" value=">" class="right" field="pla5" />
+</form>
+<div class="chance">
+	<div data-val="chance5 box1" class="box green"></div>
+	<div data-val="chance5 box2" class="box green"></div>
+	<div data-val="chance5 box3" class="box green"></div>
+</div>
+</div>
+<div class="player">
+<div class="playername"><input class="name" name="pla6" type="text" value="Brak" disabled /></div>
+<form id="pts6" class="pts" method="POST" action="#">
+    <input type="button" value="<" class="left" field="pla6" />
+    <input type="text" name="pla6" value="0" class="qty" />
+    <input type="button" value=">" class="right" field="pla6" />
+</form>
+<div class="chance">
+	<div data-val="chance6 box1" class="box green"></div>
+	<div data-val="chance6 box2" class="box green"></div>
+	<div data-val="chance6 box3" class="box green"></div>
+</div>
+</div>
+<div class="player">
+<div class="playername"><input class="name" name="pla7" type="text" value="Brak" disabled /></div>
+<form id="pts7" class="pts" method="POST" action="#">
+    <input type="button" value="<" class="left" field="pla7" />
+    <input type="text" name="pla7" value="0" class="qty" />
+    <input type="button" value=">" class="right" field="pla7" />
+</form>
+<div class="chance">
+	<div data-val="chance7 box1" class="box green"></div>
+	<div data-val="chance7 box2" class="box green"></div>
+	<div data-val="chance7 box3" class="box green"></div>
+</div>
+</div>
+<div class="player">
+<div class="playername"><input class="name" name="pla8" type="text" value="Brak" disabled /></div>
+<form id="pts8" class="pts" method="POST" action="#">
+    <input type="button" value="<" class="left" field="pla8" />
+    <input type="text" name="pla8" value="0" class="qty" />
+    <input type="button" value=">" class="right" field="pla8" />
+</form>
+<div class="chance">
+	<div data-val="chance8 box1" class="box green"></div>
+	<div data-val="chance8 box2" class="box green"></div>
+	<div data-val="chance8 box3" class="box green"></div>
+</div>
+</div>
+<div class="player">
+<div class="playername"><input class="name" name="pla9" type="text" value="Brak" disabled /></div>
+<form id="pts9" class="pts" method="POST" action="#">
+    <input type="button" value="<" class="left" field="pla9" />
+    <input type="text" name="pla9" value="0" class="qty" />
+    <input type="button" value=">" class="right" field="pla9" />
+</form>
+<div class="chance">
+	<div data-val="chance9 box1" class="box green"></div>
+	<div data-val="chance9 box2" class="box green"></div>
+	<div data-val="chance9 box3" class="box green"></div>
+</div>
+</div>
+
+</div>
+<div class="settings">
+<label class="switch">
+  <input type="checkbox" name="agree" title="Włącz edytowanie" class="settings-disable">
+  <span class="slider"></span>
+</label>
+<div class="copyright">© Patryk Sadowski 2019</div>
+<input type="button" value="Resetuj wartości" class="reset" />
+</div>
+</body>
+</html>

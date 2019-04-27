@@ -1,0 +1,22 @@
+{
+  "name": "1z9",
+  "version": "1.0.0",
+  "description": "",
+  "main": "public/Main.js",
+  "private": true,
+  "dependencies": {
+    "electron-log": "^3.0.5",
+    "jquery": "^3.3.1",
+    "typeface-arimo": "^0.0.72"
+  },
+  "devDependencies": {
+    "electron": "^4.1.4"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
